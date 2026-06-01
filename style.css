@@ -137,7 +137,7 @@ h1 {
 
 .control-grid {
   display: grid;
-  grid-template-columns: 1.05fr 0.78fr 0.78fr 0.9fr 1.1fr;
+  grid-template-columns: 1.05fr 0.72fr 0.72fr 0.72fr 0.72fr 0.95fr 1fr;
   gap: clamp(10px, 1.45vw, 18px);
 }
 
@@ -478,6 +478,10 @@ input[type="range"] {
     display: none;
   }
 
+  .harmony-card {
+    display: flex;
+  }
+
   .second-voice-card {
     min-height: 64px;
     padding: 9px 12px;
@@ -549,7 +553,7 @@ input[type="range"] {
   }
 
   .control-grid {
-    grid-template-columns: 1.02fr 0.74fr 0.74fr 0.86fr 1fr;
+    grid-template-columns: 1.02fr 0.68fr 0.68fr 0.68fr 0.68fr 0.86fr 1fr;
     gap: 9px;
   }
 
@@ -560,7 +564,8 @@ input[type="range"] {
 
   .octave-card,
   .select-card,
-  .volume-card {
+  .volume-card,
+  .second-voice-card {
     padding: 9px 12px;
   }
 

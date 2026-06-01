@@ -36,13 +36,11 @@ let deferredInstallPrompt = null;
 let secondVoiceMode = 0;
 const SECOND_VOICE_MODES = [-1, 0, 1];
 const SECOND_VOICE_LABELS = {
-  "-1": "Segunda voz abajo",
+  "-1": "Tercera abajo",
   0: "Neutral",
-  1: "Segunda voz arriba"
+  1: "Tercera arriba"
 };
-// Segunda voz estilo norteño: intervalo abierto de 5 semitonos.
-// Ejemplo: A#4/Bb4 con segunda voz abajo = F4.
-const SECOND_VOICE_INTERVAL_SEMITONES = 5;
+const NORTEÑO_THIRD_INTERVAL = 4;
 const activePointers = new Map();
 const pressedKeys = new Set();
 
@@ -68,7 +66,10 @@ function normalizePitchClass(midi) {
 
 function getSecondVoiceMidi(midi) {
   if (secondVoiceMode === 0) return null;
-  return midi + (secondVoiceMode * SECOND_VOICE_INTERVAL_SEMITONES);
+
+  // Para la segunda voz estilo norteño se usa una tercera mayor cromática
+  // de 4 semitonos. Ejemplo: D4 en tercera abajo = A#3 / Bb3.
+  return midi + (secondVoiceMode * NORTEÑO_THIRD_INTERVAL);
 }
 
 function midiToNoteName(midi) {
@@ -91,7 +92,7 @@ function flashHarmonyKey(midi) {
 function updateSecondVoiceSwitch() {
   secondVoiceSwitch.dataset.mode = String(secondVoiceMode);
   secondVoiceSwitchText.textContent = SECOND_VOICE_LABELS[secondVoiceMode];
-  secondVoiceSwitch.setAttribute("aria-label", `Modo de segunda voz: ${SECOND_VOICE_LABELS[secondVoiceMode]}`);
+  secondVoiceSwitch.setAttribute("aria-label", `Modo de terceras: ${SECOND_VOICE_LABELS[secondVoiceMode]}`);
 }
 
 function playPiano(freq, velocity = 1) {
@@ -245,7 +246,7 @@ function triggerKey(key, velocity = 1) {
   pressVisual(key);
   if (secondVoiceName) {
     noteDisplay.textContent = `${key.dataset.note} + ${secondVoiceName}`;
-    statusText.textContent = `Sonando ${key.dataset.note} con ${SECOND_VOICE_LABELS[secondVoiceMode].toLowerCase()}`;
+    statusText.textContent = `Sonando ${key.dataset.note} con ${SECOND_VOICE_LABELS[secondVoiceMode].toLowerCase()} (${secondVoiceName})`;
   }
 
   playPiano(midiToFreq(midi), velocity);

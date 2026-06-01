@@ -2,6 +2,8 @@
 
 Piano web responsive listo para GitHub Pages. Es una aplicación estática: no usa Python, backend, build tools ni dependencias externas.
 
+Incluye modo de segunda voz con terceras diatónicas arriba o abajo. Para que la armonía suene correcta, selecciona la tonalidad y la escala de la canción antes de tocar. Si una tecla no pertenece a la escala elegida, la app usa una tercera cromática como respaldo.
+
 ## Archivos
 
 - `index.html`
