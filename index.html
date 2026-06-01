@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Pocket Piano" />
   <title>Pocket Piano</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=reference-ui" />
+  <link rel="stylesheet" href="style.css?v=thirds-ui" />
 </head>
 <body>
   <div class="app-shell">
@@ -57,6 +57,13 @@
         </select>
       </label>
 
+      <div class="control-card thirds-card">
+        <span class="label">Terceras</span>
+        <button id="thirdSwitch" class="third-switch" type="button" aria-label="Cambiar modo de terceras" aria-live="polite" data-mode="0">
+          <span id="thirdSwitchText">Neutral</span>
+        </button>
+      </div>
+
       <label class="control-card volume-card">
         <span class="label">Volumen</span>
         <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.72" aria-label="Volumen" />
@@ -73,11 +80,11 @@
     </main>
 
     <footer class="hintbar">
-      <span>Teclado físico: A W S E D F T G Y H U J K O L P Ñ</span>
+      <span>Teclado físico: A W S E D F T G Y H U J K O L P Ñ · Terceras: abajo / neutral / arriba</span>
       <span>Gira el móvil para más teclas visibles.</span>
     </footer>
   </div>
 
-  <script src="script.js?v=reference-ui" defer></script>
+  <script src="script.js?v=thirds-ui" defer></script>
 </body>
 </html>

@@ -23,6 +23,8 @@ const octaveUp = document.getElementById("octaveUp");
 const rangeSelect = document.getElementById("rangeSelect");
 const toneSelect = document.getElementById("toneSelect");
 const volumeSlider = document.getElementById("volumeSlider");
+const thirdSwitch = document.getElementById("thirdSwitch");
+const thirdSwitchText = document.getElementById("thirdSwitchText");
 const installBtn = document.getElementById("installBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 
@@ -31,6 +33,21 @@ let masterGain;
 let baseOctave = 3;
 let octaves = 3;
 let deferredInstallPrompt = null;
+let thirdMode = 0;
+const THIRD_MODES = [-1, 0, 1];
+const THIRD_LABELS = {
+  "-1": "Tercera abajo",
+  0: "Neutral",
+  1: "Tercera arriba"
+};
+const THIRD_INTERVALS_UP = {
+  0: 4, 1: 3, 2: 3, 3: 3, 4: 3, 5: 4,
+  6: 3, 7: 4, 8: 3, 9: 3, 10: 3, 11: 3
+};
+const THIRD_INTERVALS_DOWN = {
+  0: -3, 1: -4, 2: -3, 3: -4, 4: -4, 5: -3,
+  6: -4, 7: -3, 8: -4, 9: -4, 10: -4, 11: -4
+};
 const activePointers = new Map();
 const pressedKeys = new Set();
 
@@ -48,6 +65,40 @@ function midiToFreq(midi) {
 
 function noteToMidi(note, octave) {
   return 12 * (octave + 1) + note.semitone;
+}
+
+function normalizePitchClass(midi) {
+  return ((midi % 12) + 12) % 12;
+}
+
+function getRelativeThirdMidi(midi) {
+  if (thirdMode === 0) return null;
+  const pitchClass = normalizePitchClass(midi);
+  const interval = thirdMode === 1 ? THIRD_INTERVALS_UP[pitchClass] : THIRD_INTERVALS_DOWN[pitchClass];
+  return midi + interval;
+}
+
+function midiToNoteName(midi) {
+  const note = NOTES.find(n => n.semitone === normalizePitchClass(midi));
+  const octave = Math.floor(midi / 12) - 1;
+  return `${note?.name || "?"}${octave}`;
+}
+
+function getKeyByMidi(midi) {
+  return keyboard.querySelector(`.piano-key[data-midi="${midi}"]`);
+}
+
+function flashHarmonyKey(midi) {
+  const harmonyKey = getKeyByMidi(midi);
+  if (!harmonyKey) return;
+  harmonyKey.classList.add("active", "harmony-active");
+  window.setTimeout(() => harmonyKey.classList.remove("active", "harmony-active"), 170);
+}
+
+function updateThirdSwitch() {
+  thirdSwitch.dataset.mode = String(thirdMode);
+  thirdSwitchText.textContent = THIRD_LABELS[thirdMode];
+  thirdSwitch.setAttribute("aria-label", `Modo de terceras: ${THIRD_LABELS[thirdMode]}`);
 }
 
 function playPiano(freq, velocity = 1) {
@@ -144,8 +195,10 @@ function buildKeyboard() {
     const el = document.createElement("button");
     el.type = "button";
     el.className = "white-key piano-key";
+    const midi = noteToMidi(note, note.octave);
     el.dataset.note = `${note.name}${note.octave}`;
-    el.dataset.freq = midiToFreq(noteToMidi(note, note.octave));
+    el.dataset.midi = midi;
+    el.dataset.freq = midiToFreq(midi);
     el.innerHTML = `<span class="key-label">${note.name}${note.octave}</span>`;
     keyboard.appendChild(el);
     whiteNotes.push({ note, el });
@@ -158,8 +211,10 @@ function buildKeyboard() {
       const el = document.createElement("button");
       el.type = "button";
       el.className = "black-key piano-key";
+      const midi = noteToMidi(note, note.octave);
       el.dataset.note = `${note.name}${note.octave}`;
-      el.dataset.freq = midiToFreq(noteToMidi(note, note.octave));
+      el.dataset.midi = midi;
+      el.dataset.freq = midiToFreq(midi);
       el.innerHTML = `<span class="key-label">${note.name}${note.octave}</span>`;
 
       const whiteIndex = whiteNotes.findIndex(w => w.note.octave === note.octave && w.note.name === note.name.replace("#", ""));
@@ -189,8 +244,22 @@ function triggerKey(key, velocity = 1) {
   if (!key) return;
   setupAudio();
   if (audioCtx.state === "suspended") audioCtx.resume();
+
+  const midi = Number(key.dataset.midi);
+  const thirdMidi = getRelativeThirdMidi(midi);
+  const thirdName = thirdMidi === null ? "" : midiToNoteName(thirdMidi);
+
   pressVisual(key);
-  playPiano(Number(key.dataset.freq), velocity);
+  if (thirdName) {
+    noteDisplay.textContent = `${key.dataset.note} + ${thirdName}`;
+    statusText.textContent = `Sonando ${key.dataset.note} con ${THIRD_LABELS[thirdMode].toLowerCase()}`;
+  }
+
+  playPiano(midiToFreq(midi), velocity);
+  if (thirdMidi !== null) {
+    playPiano(midiToFreq(thirdMidi), velocity * 0.86);
+    flashHarmonyKey(thirdMidi);
+  }
   navigator.vibrate?.(8);
 }
 
@@ -275,6 +344,13 @@ volumeSlider.addEventListener("input", () => {
   if (masterGain) masterGain.gain.value = Number(volumeSlider.value);
 });
 
+thirdSwitch.addEventListener("click", () => {
+  const currentIndex = THIRD_MODES.indexOf(thirdMode);
+  thirdMode = THIRD_MODES[(currentIndex + 1) % THIRD_MODES.length];
+  updateThirdSwitch();
+  statusText.textContent = `Modo: ${THIRD_LABELS[thirdMode]}`;
+});
+
 fullscreenBtn.addEventListener("click", async () => {
   if (!document.fullscreenElement) {
     await document.documentElement.requestFullscreen?.();
@@ -308,5 +384,6 @@ window.addEventListener("resize", () => {
   setTimeout(refreshKeyMap, 50);
 });
 
+updateThirdSwitch();
 buildKeyboard();
 setTimeout(refreshKeyMap, 80);

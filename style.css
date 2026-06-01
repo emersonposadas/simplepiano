@@ -137,7 +137,7 @@ h1 {
 
 .control-grid {
   display: grid;
-  grid-template-columns: 1.12fr 0.88fr 0.88fr 1.2fr;
+  grid-template-columns: 1.05fr 0.78fr 0.78fr 0.9fr 1.1fr;
   gap: clamp(10px, 1.45vw, 18px);
 }
 
@@ -203,7 +203,8 @@ h1 {
 }
 
 .select-card,
-.volume-card {
+.volume-card,
+.thirds-card {
   padding: clamp(12px, 1.45vw, 22px);
   display: flex;
   flex-direction: column;
@@ -230,6 +231,36 @@ input[type="range"] {
   width: 100%;
   accent-color: var(--accent);
   cursor: pointer;
+}
+
+.thirds-card {
+  align-items: stretch;
+}
+
+.third-switch {
+  width: 100%;
+  height: clamp(48px, 5.8vh, 62px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 16px;
+  color: var(--text);
+  background: rgba(1, 7, 19, 0.62);
+  cursor: pointer;
+  font-weight: 880;
+  font-size: clamp(14px, 1.25vw, 18px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+.third-switch[data-mode="-1"] {
+  background: linear-gradient(140deg, rgba(14, 165, 233, 0.70), rgba(1, 7, 19, 0.64));
+}
+
+.third-switch[data-mode="1"] {
+  background: linear-gradient(140deg, rgba(167, 139, 250, 0.72), rgba(1, 7, 19, 0.64));
+}
+
+.piano-key.harmony-active {
+  outline: 3px solid rgba(255, 255, 255, 0.32);
+  outline-offset: -5px;
 }
 
 .play-header {
@@ -380,6 +411,7 @@ input[type="range"] {
     grid-template-columns: 1fr 1fr;
   }
 
+  .thirds-card,
   .volume-card { grid-column: span 2; }
 
   .play-header p { display: none; }
@@ -446,6 +478,17 @@ input[type="range"] {
     display: none;
   }
 
+  .thirds-card {
+    min-height: 64px;
+    padding: 9px 12px;
+  }
+
+  .third-switch {
+    height: 38px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
   .octave-card {
     padding: 10px 12px;
   }
@@ -506,7 +549,7 @@ input[type="range"] {
   }
 
   .control-grid {
-    grid-template-columns: 1.06fr 0.82fr 0.82fr 1.1fr;
+    grid-template-columns: 1.02fr 0.74fr 0.74fr 0.86fr 1fr;
     gap: 9px;
   }
 
