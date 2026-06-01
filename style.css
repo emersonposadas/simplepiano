@@ -730,6 +730,194 @@ input[type="range"] {
   }
 }
 
+
+/* Ajuste final para móviles en horizontal: una sola barra compacta y más espacio para el piano. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .app-shell {
+    grid-template-rows: 38px minmax(0, 1fr);
+    gap: 4px;
+    padding: calc(3px + var(--safe-top)) calc(6px + env(safe-area-inset-right, 0px)) calc(4px + var(--safe-bottom)) calc(6px + env(safe-area-inset-left, 0px));
+  }
+
+  .topbar,
+  .control-grid {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .topbar {
+    display: block;
+    min-height: 0;
+  }
+
+  .brand,
+  .top-actions,
+  .play-header,
+  .hintbar {
+    display: none !important;
+  }
+
+  .control-grid {
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: minmax(132px, 1.1fr) minmax(84px, .75fr) minmax(132px, 1fr) minmax(126px, .95fr);
+    gap: 4px;
+    align-items: stretch;
+    justify-self: stretch;
+  }
+
+  .control-grid > * {
+    grid-column: auto !important;
+    min-width: 0;
+  }
+
+  .select-card:nth-child(3) {
+    display: none !important;
+  }
+
+  .control-card {
+    min-height: 0;
+    height: 38px;
+    border-radius: 12px;
+    box-shadow: 0 7px 16px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .octave-card,
+  .select-card,
+  .volume-card,
+  .second-voice-card {
+    padding: 3px 6px;
+    gap: 3px;
+  }
+
+  .octave-card {
+    grid-template-columns: 28px minmax(38px, 1fr) 28px;
+  }
+
+  .step-btn {
+    width: 27px;
+    height: 27px;
+    min-width: 27px;
+    border-radius: 8px;
+    font-size: 18px;
+  }
+
+  .label {
+    font-size: 7px;
+    line-height: 1;
+    letter-spacing: .1em;
+  }
+
+  .control-center strong {
+    font-size: 16px;
+    line-height: 1;
+    margin-top: 0;
+  }
+
+  select,
+  .second-voice-switch {
+    height: 25px;
+    min-height: 25px;
+    border-radius: 8px;
+    padding-inline: 7px;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  input[type="range"] {
+    height: 20px;
+    margin: 0;
+  }
+
+  .piano-stage {
+    grid-row: 2;
+    min-height: 0;
+    padding: 5px;
+    border-radius: 16px;
+  }
+
+  .keyboard {
+    min-height: 0;
+    border-radius: 12px;
+  }
+
+  .white-key {
+    flex-basis: var(--white-width-landscape, 54px);
+  }
+
+  .black-key {
+    width: var(--black-width-landscape, 32px);
+  }
+
+  .key-label {
+    bottom: 7px;
+    font-size: 11px;
+  }
+
+  .black-key .key-label {
+    bottom: 13px;
+    font-size: 9px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 360px) {
+  .app-shell {
+    grid-template-rows: 30px minmax(0, 1fr);
+    gap: 3px;
+    padding-top: calc(2px + var(--safe-top));
+    padding-bottom: calc(3px + var(--safe-bottom));
+  }
+
+  .control-grid {
+    grid-template-columns: minmax(120px, 1.05fr) minmax(80px, .7fr) minmax(118px, .95fr) minmax(108px, .85fr);
+    gap: 3px;
+  }
+
+  .control-card {
+    height: 30px;
+    border-radius: 10px;
+  }
+
+  .octave-card,
+  .select-card,
+  .volume-card,
+  .second-voice-card {
+    padding: 2px 5px;
+  }
+
+  .label {
+    display: none;
+  }
+
+  .octave-card {
+    grid-template-columns: 24px minmax(34px, 1fr) 24px;
+  }
+
+  .step-btn {
+    width: 23px;
+    height: 23px;
+    min-width: 23px;
+    border-radius: 7px;
+    font-size: 16px;
+  }
+
+  .control-center strong {
+    font-size: 15px;
+  }
+
+  select,
+  .second-voice-switch {
+    height: 24px;
+    min-height: 24px;
+    font-size: 13px;
+  }
+
+  .piano-stage {
+    padding: 4px;
+    border-radius: 14px;
+  }
+}
+
 @media (min-width: 1280px) {
   .white-key { flex-basis: var(--white-width-desktop, 76px); }
   .black-key { width: var(--black-width-desktop, 47px); }

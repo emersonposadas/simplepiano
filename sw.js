@@ -1,4 +1,4 @@
-const CACHE_NAME = "pocket-piano-landscape-ios-v5";
+const CACHE_NAME = "pocket-piano-landscape-ios-v6";
 const ASSETS = ["./", "./index.html", "./style.css", "./script.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
