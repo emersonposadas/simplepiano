@@ -23,8 +23,8 @@ const octaveUp = document.getElementById("octaveUp");
 const rangeSelect = document.getElementById("rangeSelect");
 const toneSelect = document.getElementById("toneSelect");
 const volumeSlider = document.getElementById("volumeSlider");
-const thirdSwitch = document.getElementById("thirdSwitch");
-const thirdSwitchText = document.getElementById("thirdSwitchText");
+const secondVoiceSwitch = document.getElementById("secondVoiceSwitch");
+const secondVoiceSwitchText = document.getElementById("secondVoiceSwitchText");
 const installBtn = document.getElementById("installBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 
@@ -33,16 +33,16 @@ let masterGain;
 let baseOctave = 3;
 let octaves = 3;
 let deferredInstallPrompt = null;
-let thirdMode = 0;
-const THIRD_MODES = [-1, 0, 1];
-const THIRD_LABELS = {
-  "-1": "Tercera abajo",
+let secondVoiceMode = 0;
+const SECOND_VOICE_MODES = [-1, 0, 1];
+const SECOND_VOICE_LABELS = {
+  "-1": "Segunda voz abajo",
   0: "Neutral",
-  1: "Tercera arriba"
+  1: "Segunda voz arriba"
 };
-// Tercera mayor cromática: 4 semitonos.
-// Ejemplo: D5 con tercera abajo = A#4/Bb4.
-const THIRD_INTERVAL_SEMITONES = 4;
+// Segunda voz estilo norteño: intervalo abierto de 5 semitonos.
+// Ejemplo: A#4/Bb4 con segunda voz abajo = F4.
+const SECOND_VOICE_INTERVAL_SEMITONES = 5;
 const activePointers = new Map();
 const pressedKeys = new Set();
 
@@ -66,9 +66,9 @@ function normalizePitchClass(midi) {
   return ((midi % 12) + 12) % 12;
 }
 
-function getRelativeThirdMidi(midi) {
-  if (thirdMode === 0) return null;
-  return midi + (thirdMode * THIRD_INTERVAL_SEMITONES);
+function getSecondVoiceMidi(midi) {
+  if (secondVoiceMode === 0) return null;
+  return midi + (secondVoiceMode * SECOND_VOICE_INTERVAL_SEMITONES);
 }
 
 function midiToNoteName(midi) {
@@ -88,10 +88,10 @@ function flashHarmonyKey(midi) {
   window.setTimeout(() => harmonyKey.classList.remove("active", "harmony-active"), 170);
 }
 
-function updateThirdSwitch() {
-  thirdSwitch.dataset.mode = String(thirdMode);
-  thirdSwitchText.textContent = THIRD_LABELS[thirdMode];
-  thirdSwitch.setAttribute("aria-label", `Modo de terceras: ${THIRD_LABELS[thirdMode]}`);
+function updateSecondVoiceSwitch() {
+  secondVoiceSwitch.dataset.mode = String(secondVoiceMode);
+  secondVoiceSwitchText.textContent = SECOND_VOICE_LABELS[secondVoiceMode];
+  secondVoiceSwitch.setAttribute("aria-label", `Modo de segunda voz: ${SECOND_VOICE_LABELS[secondVoiceMode]}`);
 }
 
 function playPiano(freq, velocity = 1) {
@@ -239,19 +239,19 @@ function triggerKey(key, velocity = 1) {
   if (audioCtx.state === "suspended") audioCtx.resume();
 
   const midi = Number(key.dataset.midi);
-  const thirdMidi = getRelativeThirdMidi(midi);
-  const thirdName = thirdMidi === null ? "" : midiToNoteName(thirdMidi);
+  const secondVoiceMidi = getSecondVoiceMidi(midi);
+  const secondVoiceName = secondVoiceMidi === null ? "" : midiToNoteName(secondVoiceMidi);
 
   pressVisual(key);
-  if (thirdName) {
-    noteDisplay.textContent = `${key.dataset.note} + ${thirdName}`;
-    statusText.textContent = `Sonando ${key.dataset.note} con ${THIRD_LABELS[thirdMode].toLowerCase()}`;
+  if (secondVoiceName) {
+    noteDisplay.textContent = `${key.dataset.note} + ${secondVoiceName}`;
+    statusText.textContent = `Sonando ${key.dataset.note} con ${SECOND_VOICE_LABELS[secondVoiceMode].toLowerCase()}`;
   }
 
   playPiano(midiToFreq(midi), velocity);
-  if (thirdMidi !== null) {
-    playPiano(midiToFreq(thirdMidi), velocity * 0.86);
-    flashHarmonyKey(thirdMidi);
+  if (secondVoiceMidi !== null) {
+    playPiano(midiToFreq(secondVoiceMidi), velocity * 0.86);
+    flashHarmonyKey(secondVoiceMidi);
   }
   navigator.vibrate?.(8);
 }
@@ -337,11 +337,11 @@ volumeSlider.addEventListener("input", () => {
   if (masterGain) masterGain.gain.value = Number(volumeSlider.value);
 });
 
-thirdSwitch.addEventListener("click", () => {
-  const currentIndex = THIRD_MODES.indexOf(thirdMode);
-  thirdMode = THIRD_MODES[(currentIndex + 1) % THIRD_MODES.length];
-  updateThirdSwitch();
-  statusText.textContent = `Modo: ${THIRD_LABELS[thirdMode]}`;
+secondVoiceSwitch.addEventListener("click", () => {
+  const currentIndex = SECOND_VOICE_MODES.indexOf(secondVoiceMode);
+  secondVoiceMode = SECOND_VOICE_MODES[(currentIndex + 1) % SECOND_VOICE_MODES.length];
+  updateSecondVoiceSwitch();
+  statusText.textContent = `Modo: ${SECOND_VOICE_LABELS[secondVoiceMode]}`;
 });
 
 fullscreenBtn.addEventListener("click", async () => {
@@ -377,6 +377,6 @@ window.addEventListener("resize", () => {
   setTimeout(refreshKeyMap, 50);
 });
 
-updateThirdSwitch();
+updateSecondVoiceSwitch();
 buildKeyboard();
 setTimeout(refreshKeyMap, 80);

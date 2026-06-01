@@ -204,7 +204,7 @@ h1 {
 
 .select-card,
 .volume-card,
-.thirds-card {
+.second-voice-card {
   padding: clamp(12px, 1.45vw, 22px);
   display: flex;
   flex-direction: column;
@@ -233,11 +233,11 @@ input[type="range"] {
   cursor: pointer;
 }
 
-.thirds-card {
+.second-voice-card {
   align-items: stretch;
 }
 
-.third-switch {
+.second-voice-switch {
   width: 100%;
   height: clamp(48px, 5.8vh, 62px);
   border: 1px solid rgba(255,255,255,0.18);
@@ -250,11 +250,11 @@ input[type="range"] {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
-.third-switch[data-mode="-1"] {
+.second-voice-switch[data-mode="-1"] {
   background: linear-gradient(140deg, rgba(14, 165, 233, 0.70), rgba(1, 7, 19, 0.64));
 }
 
-.third-switch[data-mode="1"] {
+.second-voice-switch[data-mode="1"] {
   background: linear-gradient(140deg, rgba(167, 139, 250, 0.72), rgba(1, 7, 19, 0.64));
 }
 
@@ -411,7 +411,7 @@ input[type="range"] {
     grid-template-columns: 1fr 1fr;
   }
 
-  .thirds-card,
+  .second-voice-card,
   .volume-card { grid-column: span 2; }
 
   .play-header p { display: none; }
@@ -478,12 +478,12 @@ input[type="range"] {
     display: none;
   }
 
-  .thirds-card {
+  .second-voice-card {
     min-height: 64px;
     padding: 9px 12px;
   }
 
-  .third-switch {
+  .second-voice-switch {
     height: 38px;
     font-size: 14px;
     border-radius: 12px;

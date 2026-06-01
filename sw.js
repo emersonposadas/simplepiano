@@ -1,4 +1,4 @@
-const CACHE_NAME = "pocket-piano-thirds-chromatic-major-v2";
+const CACHE_NAME = "pocket-piano-second-voice-v1";
 const ASSETS = ["./", "./index.html", "./style.css", "./script.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
