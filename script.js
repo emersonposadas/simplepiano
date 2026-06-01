@@ -1,238 +1,312 @@
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const WHITE_ORDER = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-const BLACK_OFFSETS = { 'C#': .68, 'D#': 1.68, 'F#': 3.68, 'G#': 4.68, 'A#': 5.68 };
-const KEYBOARD_MAP = ['KeyA','KeyW','KeyS','KeyE','KeyD','KeyF','KeyT','KeyG','KeyY','KeyH','KeyU','KeyJ','KeyK','KeyO','KeyL','KeyP','Semicolon','Quote'];
+const NOTES = [
+  { name: "C", type: "white", semitone: 0, key: "a" },
+  { name: "C#", type: "black", semitone: 1, key: "w" },
+  { name: "D", type: "white", semitone: 2, key: "s" },
+  { name: "D#", type: "black", semitone: 3, key: "e" },
+  { name: "E", type: "white", semitone: 4, key: "d" },
+  { name: "F", type: "white", semitone: 5, key: "f" },
+  { name: "F#", type: "black", semitone: 6, key: "t" },
+  { name: "G", type: "white", semitone: 7, key: "g" },
+  { name: "G#", type: "black", semitone: 8, key: "y" },
+  { name: "A", type: "white", semitone: 9, key: "h" },
+  { name: "A#", type: "black", semitone: 10, key: "u" },
+  { name: "B", type: "white", semitone: 11, key: "j" }
+];
 
-const piano = document.getElementById('piano');
-const octaveLabel = document.getElementById('octaveLabel');
-const volumeInput = document.getElementById('volume');
-const sustainBtn = document.getElementById('sustainBtn');
-const fullscreenBtn = document.getElementById('fullscreenBtn');
-const octaveDown = document.getElementById('octaveDown');
-const octaveUp = document.getElementById('octaveUp');
+const EXTRA_KEYS = ["k", "o", "l", "p", "ñ"];
+const keyboard = document.getElementById("keyboard");
+const octaveValue = document.getElementById("octaveValue");
+const noteDisplay = document.getElementById("noteDisplay");
+const statusText = document.getElementById("statusText");
+const octaveDown = document.getElementById("octaveDown");
+const octaveUp = document.getElementById("octaveUp");
+const rangeSelect = document.getElementById("rangeSelect");
+const toneSelect = document.getElementById("toneSelect");
+const volumeSlider = document.getElementById("volumeSlider");
+const installBtn = document.getElementById("installBtn");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
 
 let audioCtx;
-let master;
-let convolver;
-let startOctave = 3;
-let octaveCount = matchMedia('(orientation: landscape)').matches ? 4 : 3;
-let sustain = false;
+let masterGain;
+let baseOctave = 3;
+let octaves = 3;
+let deferredInstallPrompt = null;
 const activePointers = new Map();
-const heldKeyboard = new Map();
+const pressedKeys = new Set();
 
-function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
-function noteToMidi(noteName, octave) { return (octave + 1) * 12 + NOTE_NAMES.indexOf(noteName); }
-
-function createImpulseResponse(ctx) {
-  const seconds = 1.35;
-  const length = ctx.sampleRate * seconds;
-  const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
-  for (let ch = 0; ch < 2; ch++) {
-    const data = impulse.getChannelData(ch);
-    for (let i = 0; i < length; i++) {
-      const t = i / length;
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3.4) * 0.16;
-    }
-  }
-  return impulse;
-}
-
-function ensureAudio() {
+function setupAudio() {
   if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-  master = audioCtx.createGain();
-  master.gain.value = Number(volumeInput.value);
-
-  convolver = audioCtx.createConvolver();
-  convolver.buffer = createImpulseResponse(audioCtx);
-  const dry = audioCtx.createGain();
-  const wet = audioCtx.createGain();
-  dry.gain.value = 0.9;
-  wet.gain.value = 0.18;
-  dry.connect(master);
-  wet.connect(convolver);
-  convolver.connect(master);
-  master.connect(audioCtx.destination);
-  master.dry = dry;
-  master.wet = wet;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = Number(volumeSlider.value);
+  masterGain.connect(audioCtx.destination);
 }
 
-function makePianoTone(freq, velocity = 1) {
-  ensureAudio();
+function midiToFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function noteToMidi(note, octave) {
+  return 12 * (octave + 1) + note.semitone;
+}
+
+function playPiano(freq, velocity = 1) {
+  setupAudio();
   const now = audioCtx.currentTime;
+  const tone = toneSelect.value;
   const output = audioCtx.createGain();
-  const hammer = audioCtx.createGain();
-  const brightness = audioCtx.createBiquadFilter();
-  const body = audioCtx.createBiquadFilter();
+  const filter = audioCtx.createBiquadFilter();
+  const compressor = audioCtx.createDynamicsCompressor();
 
-  brightness.type = 'lowpass';
-  brightness.frequency.setValueAtTime(Math.min(12000, freq * 15), now);
-  brightness.frequency.exponentialRampToValueAtTime(Math.max(2200, freq * 5.5), now + 0.65);
-  brightness.Q.value = 0.55;
-
-  body.type = 'peaking';
-  body.frequency.value = Math.min(420, Math.max(120, freq * 1.3));
-  body.Q.value = 0.9;
-  body.gain.value = 4;
-
+  const gainAmount = Number(volumeSlider.value) * 0.72 * velocity;
   output.gain.setValueAtTime(0.0001, now);
-  output.gain.exponentialRampToValueAtTime(0.42 * velocity, now + 0.012);
-  output.gain.exponentialRampToValueAtTime(0.18 * velocity, now + 0.22);
-  output.gain.exponentialRampToValueAtTime(0.035 * velocity, now + (sustain ? 2.4 : 1.05));
-  output.gain.exponentialRampToValueAtTime(0.0001, now + (sustain ? 4.2 : 2.1));
+  output.gain.exponentialRampToValueAtTime(gainAmount, now + 0.012);
+  output.gain.exponentialRampToValueAtTime(gainAmount * 0.34, now + 0.18);
+  output.gain.exponentialRampToValueAtTime(0.0001, now + 1.65);
 
-  const partials = [
-    [1, 1.0, 0], [2.01, .45, 3], [3.02, .24, -4], [4.01, .14, 5],
-    [5.02, .08, -7], [6.03, .05, 6], [8.01, .025, -5]
-  ];
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(tone === "bright" ? 5400 : tone === "warm" ? 2600 : 3800, now);
+  filter.Q.value = tone === "bright" ? 0.85 : 0.55;
 
-  partials.forEach(([mult, amp, cents], idx) => {
+  compressor.threshold.value = -18;
+  compressor.knee.value = 18;
+  compressor.ratio.value = 4;
+  compressor.attack.value = 0.003;
+  compressor.release.value = 0.15;
+
+  const partials = tone === "bright"
+    ? [1, 0.58, 0.34, 0.18, 0.11, 0.055]
+    : tone === "warm"
+      ? [1, 0.42, 0.22, 0.12, 0.055]
+      : [1, 0.50, 0.27, 0.14, 0.07];
+
+  partials.forEach((amp, index) => {
     const osc = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    osc.type = idx < 2 ? 'triangle' : 'sine';
-    osc.frequency.setValueAtTime(freq * mult * Math.pow(2, cents / 1200), now);
-    g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(amp * velocity, now + 0.008 + idx * 0.001);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + (sustain ? 3.7 : 1.6) / (1 + idx * .18));
-    osc.connect(g).connect(brightness);
+    const partialGain = audioCtx.createGain();
+    const harmonic = index + 1;
+    const detune = index % 2 === 0 ? 1.8 : -1.6;
+
+    osc.type = index === 0 ? "triangle" : "sine";
+    osc.frequency.setValueAtTime(freq * harmonic, now);
+    osc.detune.setValueAtTime(detune, now);
+
+    partialGain.gain.setValueAtTime(amp, now);
+    partialGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, amp * 0.16), now + 0.22 + index * 0.035);
+    partialGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2 + index * 0.1);
+
+    osc.connect(partialGain);
+    partialGain.connect(output);
     osc.start(now);
-    osc.stop(now + (sustain ? 4.35 : 2.35));
+    osc.stop(now + 1.75);
   });
 
-  const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.055, audioCtx.sampleRate);
-  const noiseData = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < noiseData.length; i++) noiseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / noiseData.length, 2);
+  // Soft hammer/noise transient, very short and filtered.
+  const bufferSize = Math.floor(audioCtx.sampleRate * 0.028);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2.5);
+  }
   const noise = audioCtx.createBufferSource();
+  const noiseGain = audioCtx.createGain();
   const noiseFilter = audioCtx.createBiquadFilter();
-  noiseFilter.type = 'bandpass';
-  noiseFilter.frequency.value = Math.min(9000, freq * 9);
-  noiseFilter.Q.value = 1.2;
-  hammer.gain.setValueAtTime(0.18 * velocity, now);
-  hammer.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-  noise.buffer = noiseBuffer;
-  noise.connect(noiseFilter).connect(hammer).connect(brightness);
+  noise.buffer = buffer;
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.value = tone === "bright" ? 2100 : 1550;
+  noiseFilter.Q.value = 1.4;
+  noiseGain.gain.setValueAtTime(gainAmount * 0.055, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(output);
   noise.start(now);
+  noise.stop(now + 0.05);
 
-  brightness.connect(body).connect(output);
-  output.connect(master.dry);
-  output.connect(master.wet);
-  return { output, stopAt: now + (sustain ? 4.35 : 2.35) };
+  output.connect(filter);
+  filter.connect(compressor);
+  compressor.connect(masterGain);
 }
 
-function buildPiano() {
-  piano.innerHTML = '';
-  const whiteWidth = Math.max(42, Math.floor(piano.clientWidth / (octaveCount * 7)));
-  const blackWidth = Math.round(whiteWidth * 0.62);
-  const totalWhite = octaveCount * 7;
-  piano.style.minWidth = `${totalWhite * whiteWidth}px`;
-  piano.style.width = `${Math.max(piano.clientWidth, totalWhite * whiteWidth)}px`;
+function buildKeyboard() {
+  keyboard.innerHTML = "";
+  octaveValue.textContent = `C${baseOctave}`;
+  const whiteNotes = [];
+  const allKeys = [];
 
-  for (let o = 0; o < octaveCount; o++) {
-    const octave = startOctave + o;
-    WHITE_ORDER.forEach((name, idx) => {
-      const key = document.createElement('button');
-      const midi = noteToMidi(name, octave);
-      key.className = 'key white';
-      key.dataset.freq = midiToFreq(midi);
-      key.dataset.note = `${name}${octave}`;
-      key.style.left = `${(o * 7 + idx) * whiteWidth}px`;
-      key.style.width = `${whiteWidth}px`;
-      key.innerHTML = `<span class="note-label">${name}${octave}</span>`;
-      piano.appendChild(key);
-    });
-    Object.entries(BLACK_OFFSETS).forEach(([name, offset]) => {
-      const key = document.createElement('button');
-      const midi = noteToMidi(name, octave);
-      key.className = 'key black';
-      key.dataset.freq = midiToFreq(midi);
-      key.dataset.note = `${name}${octave}`;
-      key.style.left = `${(o * 7 + offset) * whiteWidth - blackWidth / 2}px`;
-      key.style.width = `${blackWidth}px`;
-      key.innerHTML = `<span class="note-label">${name}</span>`;
-      piano.appendChild(key);
+  for (let o = 0; o < octaves; o++) {
+    NOTES.forEach((note) => {
+      allKeys.push({ ...note, octave: baseOctave + o });
     });
   }
-  octaveLabel.textContent = `C${startOctave}–B${startOctave + octaveCount - 1}`;
+  allKeys.push({ name: "C", type: "white", semitone: 0, octave: baseOctave + octaves });
+
+  allKeys.filter(n => n.type === "white").forEach((note) => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "white-key piano-key";
+    el.dataset.note = `${note.name}${note.octave}`;
+    el.dataset.freq = midiToFreq(noteToMidi(note, note.octave));
+    el.innerHTML = `<span class="key-label">${note.name}${note.octave}</span>`;
+    keyboard.appendChild(el);
+    whiteNotes.push({ note, el });
+  });
+
+  const whiteWidth = () => whiteNotes[0]?.el.getBoundingClientRect().width || 69;
+
+  requestAnimationFrame(() => {
+    allKeys.filter(n => n.type === "black").forEach((note) => {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "black-key piano-key";
+      el.dataset.note = `${note.name}${note.octave}`;
+      el.dataset.freq = midiToFreq(noteToMidi(note, note.octave));
+      el.innerHTML = `<span class="key-label">${note.name}${note.octave}</span>`;
+
+      const whiteIndex = whiteNotes.findIndex(w => w.note.octave === note.octave && w.note.name === note.name.replace("#", ""));
+      const left = (whiteIndex + 1) * whiteWidth();
+      el.style.left = `${left}px`;
+      keyboard.appendChild(el);
+    });
+  });
 }
 
-function keyFromPoint(x, y) {
-  const items = document.elementsFromPoint(x, y);
-  return items.find(el => el.classList && el.classList.contains('key'));
+function getKeyFromPoint(x, y) {
+  const elements = document.elementsFromPoint(x, y);
+  return elements.find(el => el.classList?.contains("piano-key"));
 }
-function startKey(key, id = Symbol('note')) {
+
+function pressVisual(key) {
+  key.classList.add("active");
+  noteDisplay.textContent = key.dataset.note;
+  statusText.textContent = `Sonando ${key.dataset.note}`;
+}
+
+function releaseVisual(key) {
+  key.classList.remove("active");
+}
+
+function triggerKey(key, velocity = 1) {
   if (!key) return;
-  ensureAudio();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  key.classList.add('active');
+  setupAudio();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  pressVisual(key);
+  playPiano(Number(key.dataset.freq), velocity);
   navigator.vibrate?.(8);
-  const voice = makePianoTone(Number(key.dataset.freq), 1);
-  activePointers.set(id, { key, voice });
-}
-function endKey(id) {
-  const state = activePointers.get(id);
-  if (!state) return;
-  state.key.classList.remove('active');
-  activePointers.delete(id);
 }
 
-piano.addEventListener('pointerdown', e => {
-  const key = e.target.closest('.key');
+keyboard.addEventListener("pointerdown", (event) => {
+  const key = getKeyFromPoint(event.clientX, event.clientY);
   if (!key) return;
-  e.preventDefault();
-  key.setPointerCapture?.(e.pointerId);
-  startKey(key, e.pointerId);
+  event.preventDefault();
+  keyboard.setPointerCapture?.(event.pointerId);
+  activePointers.set(event.pointerId, key);
+  triggerKey(key);
 });
-piano.addEventListener('pointermove', e => {
-  if (!activePointers.has(e.pointerId)) return;
-  const current = activePointers.get(e.pointerId).key;
-  const next = keyFromPoint(e.clientX, e.clientY);
-  if (next && next !== current) {
-    endKey(e.pointerId);
-    startKey(next, e.pointerId);
+
+keyboard.addEventListener("pointermove", (event) => {
+  if (!activePointers.has(event.pointerId)) return;
+  const previous = activePointers.get(event.pointerId);
+  const next = getKeyFromPoint(event.clientX, event.clientY);
+  if (!next || next === previous) return;
+  releaseVisual(previous);
+  activePointers.set(event.pointerId, next);
+  triggerKey(next, 0.92);
+});
+
+function endPointer(event) {
+  const key = activePointers.get(event.pointerId);
+  if (key) releaseVisual(key);
+  activePointers.delete(event.pointerId);
+  if (activePointers.size === 0) {
+    statusText.textContent = "Listo para tocar";
+  }
+}
+
+keyboard.addEventListener("pointerup", endPointer);
+keyboard.addEventListener("pointercancel", endPointer);
+keyboard.addEventListener("pointerleave", endPointer);
+
+const keyMap = new Map();
+function refreshKeyMap() {
+  keyMap.clear();
+  const keys = [...keyboard.querySelectorAll(".piano-key")];
+  const physical = ["a","w","s","e","d","f","t","g","y","h","u","j", ...EXTRA_KEYS];
+  physical.forEach((letter, index) => {
+    if (keys[index]) keyMap.set(letter, keys[index]);
+  });
+}
+
+window.addEventListener("keydown", (event) => {
+  const letter = event.key.toLowerCase();
+  if (pressedKeys.has(letter)) return;
+  const key = keyMap.get(letter);
+  if (!key) return;
+  event.preventDefault();
+  pressedKeys.add(letter);
+  triggerKey(key);
+});
+
+window.addEventListener("keyup", (event) => {
+  const letter = event.key.toLowerCase();
+  const key = keyMap.get(letter);
+  pressedKeys.delete(letter);
+  if (key) releaseVisual(key);
+});
+
+octaveDown.addEventListener("click", () => {
+  baseOctave = Math.max(1, baseOctave - 1);
+  buildKeyboard();
+  setTimeout(refreshKeyMap, 50);
+});
+
+octaveUp.addEventListener("click", () => {
+  baseOctave = Math.min(6, baseOctave + 1);
+  buildKeyboard();
+  setTimeout(refreshKeyMap, 50);
+});
+
+rangeSelect.addEventListener("change", () => {
+  octaves = Number(rangeSelect.value);
+  buildKeyboard();
+  setTimeout(refreshKeyMap, 50);
+});
+
+volumeSlider.addEventListener("input", () => {
+  if (masterGain) masterGain.gain.value = Number(volumeSlider.value);
+});
+
+fullscreenBtn.addEventListener("click", async () => {
+  if (!document.fullscreenElement) {
+    await document.documentElement.requestFullscreen?.();
+  } else {
+    await document.exitFullscreen?.();
   }
 });
-['pointerup', 'pointercancel', 'pointerleave'].forEach(type => piano.addEventListener(type, e => endKey(e.pointerId)));
 
-document.addEventListener('keydown', e => {
-  if (e.repeat || heldKeyboard.has(e.code)) return;
-  const idx = KEYBOARD_MAP.indexOf(e.code);
-  if (idx < 0) return;
-  const noteIndex = idx % 12;
-  const oct = startOctave + Math.floor(idx / 12);
-  const note = NOTE_NAMES[noteIndex];
-  const key = [...piano.querySelectorAll('.key')].find(k => k.dataset.note === `${note}${oct}`);
-  if (key) {
-    heldKeyboard.set(e.code, e.code);
-    startKey(key, e.code);
-  }
-});
-document.addEventListener('keyup', e => {
-  heldKeyboard.delete(e.code);
-  endKey(e.code);
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installBtn.hidden = false;
 });
 
-volumeInput.addEventListener('input', () => { if (master) master.gain.value = Number(volumeInput.value); });
-sustainBtn.addEventListener('click', () => {
-  sustain = !sustain;
-  sustainBtn.classList.toggle('on', sustain);
-  sustainBtn.setAttribute('aria-pressed', String(sustain));
+installBtn.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.hidden = true;
 });
-fullscreenBtn.addEventListener('click', async () => {
-  if (!document.fullscreenElement) await document.documentElement.requestFullscreen?.();
-  else await document.exitFullscreen?.();
-});
-octaveDown.addEventListener('click', () => { startOctave = Math.max(1, startOctave - 1); buildPiano(); });
-octaveUp.addEventListener('click', () => { startOctave = Math.min(5, startOctave + 1); buildPiano(); });
 
-function responsiveOctaves() {
-  const landscape = matchMedia('(orientation: landscape)').matches;
-  octaveCount = landscape ? (innerWidth > 1000 ? 5 : 4) : (innerWidth > 560 ? 4 : 3);
-  buildPiano();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
 }
-addEventListener('resize', responsiveOctaves);
-addEventListener('orientationchange', () => setTimeout(responsiveOctaves, 150));
-responsiveOctaves();
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-}
+window.addEventListener("resize", () => {
+  buildKeyboard();
+  setTimeout(refreshKeyMap, 50);
+});
+
+buildKeyboard();
+setTimeout(refreshKeyMap, 80);

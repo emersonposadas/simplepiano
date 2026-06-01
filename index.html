@@ -3,41 +3,81 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#090b12" />
+  <meta name="theme-color" content="#07111f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Pocket Piano" />
   <title>Pocket Piano</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=elegant-layout-1" />
+  <link rel="stylesheet" href="style.css?v=reference-ui" />
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar glass">
-      <section class="brand">
-        <div class="logo">♪</div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="app-icon" aria-hidden="true">♪</div>
         <div>
           <h1>Pocket Piano</h1>
-          <p>Piano acústico web</p>
+          <p id="statusText">Listo para tocar</p>
         </div>
-      </section>
-      <section class="controls">
-        <button class="pill" id="octaveDown" aria-label="Bajar octava">−</button>
-        <div class="readout"><span>Octavas</span><strong id="octaveLabel">C3–B6</strong></div>
-        <button class="pill" id="octaveUp" aria-label="Subir octava">+</button>
-        <label class="slider-wrap"><span>Vol</span><input id="volume" type="range" min="0" max="1" value="0.72" step="0.01" /></label>
-        <button class="pill wide" id="sustainBtn" aria-pressed="false">Sustain</button>
-        <button class="pill wide" id="fullscreenBtn">Pantalla</button>
-      </section>
+      </div>
+
+      <div class="top-actions">
+        <button id="installBtn" class="pill-btn" type="button" hidden>Instalar</button>
+        <button id="fullscreenBtn" class="round-btn" type="button" aria-label="Pantalla completa">⛶</button>
+      </div>
     </header>
 
-    <section class="stage">
-      <div class="hint glass" id="hint">Toca varias teclas a la vez. En móvil usa horizontal para más octavas.</div>
-      <div class="piano-frame glass">
-        <div class="piano" id="piano" aria-label="Piano multitáctil" role="application"></div>
+    <section class="control-grid" aria-label="Controles del piano">
+      <div class="control-card octave-card">
+        <button id="octaveDown" class="step-btn" type="button" aria-label="Bajar octava">−</button>
+        <div class="control-center">
+          <span class="label">Octava</span>
+          <strong id="octaveValue">C3</strong>
+        </div>
+        <button id="octaveUp" class="step-btn" type="button" aria-label="Subir octava">+</button>
       </div>
+
+      <label class="control-card select-card">
+        <span class="label">Rango</span>
+        <select id="rangeSelect" aria-label="Seleccionar rango de octavas">
+          <option value="2">2 octavas</option>
+          <option value="3" selected>3 octavas</option>
+          <option value="4">4 octavas</option>
+          <option value="5">5 octavas</option>
+        </select>
+      </label>
+
+      <label class="control-card select-card">
+        <span class="label">Sonido</span>
+        <select id="toneSelect" aria-label="Seleccionar tipo de sonido">
+          <option value="soft" selected>Suave</option>
+          <option value="bright">Brillante</option>
+          <option value="warm">Cálido</option>
+        </select>
+      </label>
+
+      <label class="control-card volume-card">
+        <span class="label">Volumen</span>
+        <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.72" aria-label="Volumen" />
+      </label>
     </section>
-  </main>
-  <script src="script.js?v=compact-1"></script>
+
+    <section class="play-header">
+      <h2 id="noteDisplay">Toca una tecla</h2>
+      <p>Multitáctil · Responsive · GitHub Pages</p>
+    </section>
+
+    <main class="piano-stage">
+      <div id="keyboard" class="keyboard" aria-label="Teclado de piano" role="application"></div>
+    </main>
+
+    <footer class="hintbar">
+      <span>Teclado físico: A W S E D F T G Y H U J K O L P Ñ</span>
+      <span>Gira el móvil para más teclas visibles.</span>
+    </footer>
+  </div>
+
+  <script src="script.js?v=reference-ui" defer></script>
 </body>
 </html>

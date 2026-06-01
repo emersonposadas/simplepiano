@@ -1,43 +1,24 @@
 # Pocket Piano
 
-Piano web estático con apariencia de aplicación móvil, listo para GitHub Pages.
+Piano web responsive listo para GitHub Pages. Es una aplicación estática: no usa Python, backend, build tools ni dependencias externas.
 
-## Características
+## Archivos
 
-- 100% HTML, CSS y JavaScript.
-- Sin Python, sin backend y sin dependencias externas.
-- Sonido tipo piano tradicional generado con Web Audio API.
-- Diseño compacto tipo app.
-- Responsive en vertical y landscape.
-- Multitáctil para móvil y tablet.
-- Teclas con animación, iluminación y vibración compatible.
-- Selector de octavas, volumen, sustain y pantalla completa.
-- PWA básica instalable desde el navegador.
+- `index.html`
+- `style.css`
+- `script.js`
+- `manifest.webmanifest`
+- `sw.js`
+- `icon.svg`
 
 ## Publicar en GitHub Pages
 
-1. Crea un repositorio en GitHub.
-2. Sube todos los archivos de este ZIP a la raíz del repositorio.
-3. Entra en **Settings → Pages**.
-4. En **Build and deployment**, selecciona:
-   - Source: `Deploy from a branch`
-   - Branch: `main`
-   - Folder: `/root`
-5. Guarda los cambios.
+1. Sube estos archivos a la raíz del repositorio.
+2. Ve a **Settings → Pages**.
+3. Selecciona **Deploy from branch**.
+4. Usa la rama `main` y carpeta `/root`.
+5. Abre la URL de GitHub Pages.
 
-GitHub generará una URL parecida a:
+## Caché
 
-```text
-https://tuusuario.github.io/nombre-del-repo/
-```
-
-## Evitar caché en Chrome
-
-Si no ves los últimos cambios:
-
-- Usa `Ctrl + Shift + R` en Windows/Linux.
-- Usa `Cmd + Shift + R` en Mac.
-- O abre DevTools → Application → Service Workers → Unregister.
-- Luego Application → Storage → Clear site data.
-
-El HTML ya usa versiones en `style.css?v=compact-1` y `script.js?v=compact-1` para ayudar a evitar caché vieja.
+Si cambias archivos y Chrome muestra una versión antigua, desregistra el Service Worker desde DevTools → Application → Service Workers → Unregister, luego limpia los datos del sitio.
