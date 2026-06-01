@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Pocket Piano" />
   <title>Pocket Piano</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=landscape-ios-v6" />
+  <link rel="stylesheet" href="style.css?v=landscape-ios-v7" />
 </head>
 <body>
   <div class="app-shell">
@@ -28,7 +28,9 @@
       </div>
     </header>
 
-    <section class="control-grid" aria-label="Controles del piano">
+    <button id="controlsToggle" class="controls-toggle" type="button" aria-expanded="false" aria-controls="controlsPanel">⚙ Controles</button>
+
+    <section id="controlsPanel" class="control-grid" aria-label="Controles del piano"> aria-label="Controles del piano">
       <div class="control-card octave-card">
         <button id="octaveDown" class="step-btn" type="button" aria-label="Bajar octava">−</button>
         <div class="control-center">
@@ -85,6 +87,6 @@
     </footer>
   </div>
 
-  <script src="script.js?v=landscape-ios-v6" defer></script>
+  <script src="script.js?v=landscape-ios-v7" defer></script>
 </body>
 </html>

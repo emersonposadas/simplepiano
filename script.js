@@ -27,6 +27,8 @@ const secondVoiceSwitch = document.getElementById("secondVoiceSwitch");
 const secondVoiceSwitchText = document.getElementById("secondVoiceSwitchText");
 const installBtn = document.getElementById("installBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
+const controlsToggle = document.getElementById("controlsToggle");
+const controlsPanel = document.getElementById("controlsPanel");
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 function updateViewportUnit() {
@@ -34,6 +36,26 @@ function updateViewportUnit() {
   document.documentElement.style.setProperty("--vh", `${viewportHeight * 0.01}px`);
 }
 
+
+
+function setControlsOpen(isOpen) {
+  document.body.classList.toggle("controls-open", isOpen);
+  controlsToggle?.setAttribute("aria-expanded", String(isOpen));
+}
+
+function isCompactLandscape() {
+  return window.matchMedia("(orientation: landscape) and (max-height: 560px)").matches;
+}
+
+controlsToggle?.addEventListener("click", () => {
+  setControlsOpen(!document.body.classList.contains("controls-open"));
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (!isCompactLandscape() || !document.body.classList.contains("controls-open")) return;
+  if (controlsPanel?.contains(event.target) || controlsToggle?.contains(event.target)) return;
+  setControlsOpen(false);
+});
 
 let audioCtx;
 let masterGain;
@@ -416,12 +438,14 @@ if ("serviceWorker" in navigator) {
 
 window.addEventListener("resize", () => {
   updateViewportUnit();
+  if (!isCompactLandscape()) setControlsOpen(false);
   buildKeyboard();
   setTimeout(refreshKeyMap, 50);
 });
 
 window.visualViewport?.addEventListener("resize", () => {
   updateViewportUnit();
+  if (!isCompactLandscape()) setControlsOpen(false);
   buildKeyboard();
   setTimeout(refreshKeyMap, 50);
 });
@@ -429,6 +453,7 @@ window.visualViewport?.addEventListener("resize", () => {
 window.addEventListener("orientationchange", () => {
   window.setTimeout(() => {
     updateViewportUnit();
+    setControlsOpen(false);
     buildKeyboard();
     refreshKeyMap();
   }, 180);
