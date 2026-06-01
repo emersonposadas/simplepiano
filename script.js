@@ -40,14 +40,9 @@ const THIRD_LABELS = {
   0: "Neutral",
   1: "Tercera arriba"
 };
-const THIRD_INTERVALS_UP = {
-  0: 4, 1: 3, 2: 3, 3: 3, 4: 3, 5: 4,
-  6: 3, 7: 4, 8: 3, 9: 3, 10: 3, 11: 3
-};
-const THIRD_INTERVALS_DOWN = {
-  0: -3, 1: -4, 2: -3, 3: -4, 4: -4, 5: -3,
-  6: -4, 7: -3, 8: -4, 9: -4, 10: -4, 11: -4
-};
+// Tercera mayor cromática: 4 semitonos.
+// Ejemplo: D5 con tercera abajo = A#4/Bb4.
+const THIRD_INTERVAL_SEMITONES = 4;
 const activePointers = new Map();
 const pressedKeys = new Set();
 
@@ -73,9 +68,7 @@ function normalizePitchClass(midi) {
 
 function getRelativeThirdMidi(midi) {
   if (thirdMode === 0) return null;
-  const pitchClass = normalizePitchClass(midi);
-  const interval = thirdMode === 1 ? THIRD_INTERVALS_UP[pitchClass] : THIRD_INTERVALS_DOWN[pitchClass];
-  return midi + interval;
+  return midi + (thirdMode * THIRD_INTERVAL_SEMITONES);
 }
 
 function midiToNoteName(midi) {
