@@ -36,11 +36,25 @@ let deferredInstallPrompt = null;
 let secondVoiceMode = 0;
 const SECOND_VOICE_MODES = [-1, 0, 1];
 const SECOND_VOICE_LABELS = {
-  "-1": "Tercera abajo",
+  "-1": "Grave segunda voz",
   0: "Neutral",
-  1: "Tercera arriba"
+  1: "Aguda segunda voz"
 };
-const NORTEÑO_THIRD_INTERVAL = 4;
+
+// Reglas de segunda voz estilo norteño indicadas por el usuario.
+// Primera voz: DO RE MI FA SOL LA SI
+// Aguda:       MI FA# SOL# LA SI DO# RE#
+// Grave:       SOL# LA# DO DO# RE# FA SOL
+const SECOND_VOICE_RULES = {
+  0: { up: 4, down: 8 },   // DO -> MI / SOL#
+  2: { up: 6, down: 10 },  // RE -> FA# / LA#
+  4: { up: 8, down: 0 },   // MI -> SOL# / DO
+  5: { up: 9, down: 1 },   // FA -> LA / DO#
+  7: { up: 11, down: 3 },  // SOL -> SI / RE#
+  9: { up: 1, down: 5 },   // LA -> DO# / FA
+  11: { up: 3, down: 7 }   // SI -> RE# / SOL
+};
+const CHROMATIC_FALLBACK_INTERVAL = 4;
 const activePointers = new Map();
 const pressedKeys = new Set();
 
@@ -67,9 +81,21 @@ function normalizePitchClass(midi) {
 function getSecondVoiceMidi(midi) {
   if (secondVoiceMode === 0) return null;
 
-  // Para la segunda voz estilo norteño se usa una tercera mayor cromática
-  // de 4 semitonos. Ejemplo: D4 en tercera abajo = A#3 / Bb3.
-  return midi + (secondVoiceMode * NORTEÑO_THIRD_INTERVAL);
+  const pitchClass = normalizePitchClass(midi);
+  const rule = SECOND_VOICE_RULES[pitchClass];
+
+  if (!rule) {
+    // Para teclas negras no incluidas en la tabla, se conserva la relación cromática.
+    return midi + (secondVoiceMode * CHROMATIC_FALLBACK_INTERVAL);
+  }
+
+  const targetPitchClass = secondVoiceMode === 1 ? rule.up : rule.down;
+  const rawDistance = targetPitchClass - pitchClass;
+  const interval = secondVoiceMode === 1
+    ? (rawDistance + 12) % 12
+    : -((pitchClass - targetPitchClass + 12) % 12);
+
+  return midi + interval;
 }
 
 function midiToNoteName(midi) {
@@ -92,7 +118,7 @@ function flashHarmonyKey(midi) {
 function updateSecondVoiceSwitch() {
   secondVoiceSwitch.dataset.mode = String(secondVoiceMode);
   secondVoiceSwitchText.textContent = SECOND_VOICE_LABELS[secondVoiceMode];
-  secondVoiceSwitch.setAttribute("aria-label", `Modo de terceras: ${SECOND_VOICE_LABELS[secondVoiceMode]}`);
+  secondVoiceSwitch.setAttribute("aria-label", `Modo de segunda voz: ${SECOND_VOICE_LABELS[secondVoiceMode]}`);
 }
 
 function playPiano(freq, velocity = 1) {

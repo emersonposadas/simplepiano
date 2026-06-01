@@ -24,3 +24,20 @@ Incluye modo de segunda voz con terceras diatónicas arriba o abajo. Para que la
 ## Caché
 
 Si cambias archivos y Chrome muestra una versión antigua, desregistra el Service Worker desde DevTools → Application → Service Workers → Unregister, luego limpia los datos del sitio.
+
+
+## Segunda voz norteña
+
+La segunda voz usa estas reglas para las notas naturales:
+
+| Primera voz | Aguda | Grave |
+|---|---|---|
+| DO | MI | SOL# |
+| RE | FA# | LA# |
+| MI | SOL# | DO |
+| FA | LA | DO# |
+| SOL | SI | RE# |
+| LA | DO# | FA |
+| SI | RE# | SOL |
+
+Ejemplo: `D4` en modo grave produce `A#3`.
