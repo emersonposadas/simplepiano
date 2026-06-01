@@ -1,19 +1,14 @@
 {
   "name": "Pocket Piano",
   "short_name": "Piano",
-  "description": "Piano responsive tipo app para GitHub Pages.",
+  "description": "Piano móvil responsive con sonido acústico sintetizado.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#080b14",
-  "theme_color": "#080b14",
+  "background_color": "#090b12",
+  "theme_color": "#090b12",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }

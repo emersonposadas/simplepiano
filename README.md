@@ -1,66 +1,36 @@
-# Pocket Piano para GitHub Pages
+# Pocket Piano
 
-Piano web responsive con apariencia de aplicación móvil. Es 100% estático: no usa Python, backend, base de datos ni dependencias externas.
+Piano web 100% estático para GitHub Pages, diseñado para sentirse como una app móvil.
 
 ## Características
 
 - HTML, CSS y JavaScript puro.
-- Publicable directamente en GitHub Pages.
-- Diseño tipo app móvil, no tipo página clásica.
-- Soporte vertical y horizontal.
-- Multitáctil para tocar varias notas a la vez.
-- Varias octavas configurables, de 2 a 7.
-- Cambio visual al presionar cada tecla.
-- Vibración breve en móviles compatibles.
-- Control de volumen.
-- Sonidos generados con Web Audio API.
-- PWA básica instalable desde el navegador.
-- Caché offline mediante Service Worker.
+- Sin Python, sin servidor y sin dependencias externas.
+- Sonido tipo piano acústico sintetizado con Web Audio API.
+- Varias octavas visibles automáticamente según pantalla.
+- Responsive en vertical y horizontal.
+- Multitáctil para móviles.
+- Teclas con animación, iluminación y vibración.
+- PWA instalable desde el navegador.
+- Funciona en GitHub Pages.
 
-## Archivos
+## Publicar en GitHub Pages
 
-```text
-.
-├── index.html
-├── style.css
-├── script.js
-├── manifest.webmanifest
-├── sw.js
-├── icon.svg
-└── README.md
-```
+1. Crea un repositorio nuevo en GitHub.
+2. Sube todos los archivos de este ZIP en la raíz del repositorio.
+3. Entra a `Settings > Pages`.
+4. En `Build and deployment`, elige `Deploy from a branch`.
+5. Selecciona `main` y `/root`.
+6. Abre la URL publicada por GitHub Pages.
 
-## Cómo publicarlo en GitHub Pages
+## Uso
 
-1. Crea un repositorio en GitHub.
-2. Sube todos los archivos de este proyecto en la raíz del repositorio.
-3. Entra a **Settings > Pages**.
-4. En **Build and deployment**, selecciona:
-   - Source: **Deploy from a branch**
-   - Branch: **main**
-   - Folder: **/root**
-5. Guarda los cambios.
-6. GitHub generará una URL similar a:
+- En móvil: toca las teclas directamente. Gira el teléfono a horizontal para ver más octavas.
+- En escritorio: usa clic/touch o el teclado físico desde `A W S E D F T G Y H U J...`.
+- Activa `Sustain` para notas con cola más larga.
 
-```text
-https://tu-usuario.github.io/nombre-del-repo/
-```
+## Nota sobre el sonido
 
-## Uso móvil
+Esta versión no usa archivos MP3/WAV externos. El sonido de piano se genera con síntesis: armónicos, ruido de martillo, envolvente de ataque/decay, filtro dinámico y reverb corta. Esto mantiene el proyecto ligero y compatible con GitHub Pages.
 
-En Android o iPhone, abre la URL en el navegador y usa la opción **Añadir a pantalla de inicio**. Al abrirse desde el icono instalado, se verá más como una aplicación que como una página web.
-
-## Personalización rápida
-
-En `script.js` puedes cambiar la octava inicial modificando:
-
-```js
-let startOctave = 3;
-```
-
-En `style.css` puedes cambiar el color principal modificando:
-
-```css
---accent: #6ee7ff;
---accent-hot: #a78bfa;
-```
+Para un piano acústico todavía más realista, se pueden agregar muestras `.mp3` o `.wav` por nota, pero el ZIP sería más pesado.
