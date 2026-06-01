@@ -1,0 +1,11 @@
+{
+  "name": "Piano Web Móvil",
+  "short_name": "Piano Web",
+  "description": "Piano básico responsive para móvil, tablet y computador.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#111827",
+  "orientation": "any",
+  "icons": []
+}
