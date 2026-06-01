@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#080b14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pocket Piano" />
+  <meta name="description" content="Piano responsive tipo app para GitHub Pages." />
+  <title>Pocket Piano</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-topbar">
+      <div class="brand">
+        <div class="app-icon" aria-hidden="true">♪</div>
+        <div>
+          <h1>Pocket Piano</h1>
+          <p id="statusText">Listo para tocar</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="installBtn" type="button" hidden>Instalar</button>
+        <button class="icon-button" id="fullscreenBtn" type="button" aria-label="Pantalla completa">⛶</button>
+      </div>
+    </header>
+
+    <section class="control-deck" aria-label="Controles del piano">
+      <div class="control-card octave-card">
+        <button class="round-button" id="octaveDown" type="button" aria-label="Bajar octava">−</button>
+        <div class="readout">
+          <span>Octava</span>
+          <strong id="octaveReadout">C3</strong>
+        </div>
+        <button class="round-button" id="octaveUp" type="button" aria-label="Subir octava">+</button>
+      </div>
+
+      <label class="control-card select-card">
+        <span>Rango</span>
+        <select id="octaveCount">
+          <option value="2">2 octavas</option>
+          <option value="3" selected>3 octavas</option>
+          <option value="4">4 octavas</option>
+          <option value="5">5 octavas</option>
+          <option value="6">6 octavas</option>
+          <option value="7">7 octavas</option>
+        </select>
+      </label>
+
+      <label class="control-card select-card compact-control">
+        <span>Sonido</span>
+        <select id="waveform">
+          <option value="sine" selected>Suave</option>
+          <option value="triangle">Cálido</option>
+          <option value="square">Retro</option>
+          <option value="sawtooth">Brillante</option>
+        </select>
+      </label>
+
+      <label class="control-card volume-card">
+        <span>Volumen</span>
+        <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5" />
+      </label>
+    </section>
+
+    <section class="piano-stage" aria-label="Piano interactivo">
+      <div class="now-playing">
+        <span id="noteDisplay">Toca una tecla</span>
+        <small>Multitáctil · Responsive · GitHub Pages</small>
+      </div>
+      <div class="piano-window">
+        <div id="piano" class="piano" role="application" aria-label="Piano multitáctil"></div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>Teclado físico: A W S E D F T G Y H U J K O L P Ñ</span>
+      <span>Gira el móvil para más teclas visibles.</span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

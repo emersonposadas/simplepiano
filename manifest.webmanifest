@@ -1,0 +1,19 @@
+{
+  "name": "Pocket Piano",
+  "short_name": "Piano",
+  "description": "Piano responsive tipo app para GitHub Pages.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080b14",
+  "theme_color": "#080b14",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
