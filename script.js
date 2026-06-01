@@ -208,7 +208,7 @@ function playPiano(freq, velocity = 1) {
     const osc = audioCtx.createOscillator();
     const partialGain = audioCtx.createGain();
     const harmonic = index + 1;
-    const detune = index % 2 === 0 ? 1.8 : -1.6;
+    const detune = index === 0 ? 0 : (index % 2 === 0 ? 1.8 : -1.6);
 
     osc.type = index === 0 ? "triangle" : "sine";
     osc.frequency.setValueAtTime(freq * harmonic, now);
