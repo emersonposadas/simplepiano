@@ -27,6 +27,13 @@ const secondVoiceSwitch = document.getElementById("secondVoiceSwitch");
 const secondVoiceSwitchText = document.getElementById("secondVoiceSwitchText");
 const installBtn = document.getElementById("installBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+function updateViewportUnit() {
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  document.documentElement.style.setProperty("--vh", `${viewportHeight * 0.01}px`);
+}
+
 
 let audioCtx;
 let masterGain;
@@ -371,13 +378,21 @@ secondVoiceSwitch.addEventListener("click", () => {
   statusText.textContent = `Modo: ${SECOND_VOICE_LABELS[secondVoiceMode]}`;
 });
 
-fullscreenBtn.addEventListener("click", async () => {
-  if (!document.fullscreenElement) {
-    await document.documentElement.requestFullscreen?.();
-  } else {
-    await document.exitFullscreen?.();
-  }
-});
+if (isIOS || !document.documentElement.requestFullscreen) {
+  fullscreenBtn.hidden = true;
+} else {
+  fullscreenBtn.addEventListener("click", async () => {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen?.();
+    }
+  });
+}
+
+document.addEventListener("gesturestart", (event) => event.preventDefault());
+document.addEventListener("gesturechange", (event) => event.preventDefault());
+document.addEventListener("gestureend", (event) => event.preventDefault());
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
@@ -400,10 +415,26 @@ if ("serviceWorker" in navigator) {
 }
 
 window.addEventListener("resize", () => {
+  updateViewportUnit();
   buildKeyboard();
   setTimeout(refreshKeyMap, 50);
 });
 
+window.visualViewport?.addEventListener("resize", () => {
+  updateViewportUnit();
+  buildKeyboard();
+  setTimeout(refreshKeyMap, 50);
+});
+
+window.addEventListener("orientationchange", () => {
+  window.setTimeout(() => {
+    updateViewportUnit();
+    buildKeyboard();
+    refreshKeyMap();
+  }, 180);
+});
+
+updateViewportUnit();
 updateSecondVoiceSwitch();
 buildKeyboard();
 setTimeout(refreshKeyMap, 80);
