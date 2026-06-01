@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Pocket Piano" />
   <title>Pocket Piano</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=landscape-ios-v7" />
+  <link rel="stylesheet" href="style.css?v=landscape-panel-v4" />
 </head>
 <body>
   <div class="app-shell">
@@ -23,14 +23,13 @@
       </div>
 
       <div class="top-actions">
+        <button id="controlsToggle" class="pill-btn controls-toggle" type="button" aria-label="Mostrar controles del piano" aria-controls="controlGrid" aria-expanded="false">⚙ Controles</button>
         <button id="installBtn" class="pill-btn" type="button" hidden>Instalar</button>
         <button id="fullscreenBtn" class="round-btn" type="button" aria-label="Pantalla completa">⛶</button>
       </div>
     </header>
 
-    <button id="controlsToggle" class="controls-toggle" type="button" aria-expanded="false" aria-controls="controlsPanel">⚙ Controles</button>
-
-    <section id="controlsPanel" class="control-grid" aria-label="Controles del piano"> aria-label="Controles del piano">
+    <section id="controlGrid" class="control-grid" aria-label="Controles del piano">
       <div class="control-card octave-card">
         <button id="octaveDown" class="step-btn" type="button" aria-label="Bajar octava">−</button>
         <div class="control-center">
@@ -87,6 +86,6 @@
     </footer>
   </div>
 
-  <script src="script.js?v=landscape-ios-v7" defer></script>
+  <script src="script.js?v=landscape-panel-v4" defer></script>
 </body>
 </html>

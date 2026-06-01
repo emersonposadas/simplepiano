@@ -15,6 +15,7 @@ const NOTES = [
 
 const EXTRA_KEYS = ["k", "o", "l", "p", "ñ"];
 const keyboard = document.getElementById("keyboard");
+const controlGrid = document.getElementById("controlGrid");
 const octaveValue = document.getElementById("octaveValue");
 const noteDisplay = document.getElementById("noteDisplay");
 const statusText = document.getElementById("statusText");
@@ -28,7 +29,6 @@ const secondVoiceSwitchText = document.getElementById("secondVoiceSwitchText");
 const installBtn = document.getElementById("installBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 const controlsToggle = document.getElementById("controlsToggle");
-const controlsPanel = document.getElementById("controlsPanel");
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 function updateViewportUnit() {
@@ -36,26 +36,21 @@ function updateViewportUnit() {
   document.documentElement.style.setProperty("--vh", `${viewportHeight * 0.01}px`);
 }
 
-
-
-function setControlsOpen(isOpen) {
-  document.body.classList.toggle("controls-open", isOpen);
-  controlsToggle?.setAttribute("aria-expanded", String(isOpen));
+function isLandscapeView() {
+  return window.matchMedia("(orientation: landscape)").matches;
 }
 
-function isCompactLandscape() {
-  return window.matchMedia("(orientation: landscape) and (max-height: 560px)").matches;
+function setControlsOpen(open) {
+  if (!controlGrid || !controlsToggle) return;
+  controlGrid.classList.toggle("is-open", open);
+  controlsToggle.setAttribute("aria-expanded", String(open));
+  controlsToggle.setAttribute("aria-label", open ? "Ocultar controles del piano" : "Mostrar controles del piano");
 }
 
-controlsToggle?.addEventListener("click", () => {
-  setControlsOpen(!document.body.classList.contains("controls-open"));
-});
+function closeLandscapeControls() {
+  if (isLandscapeView()) setControlsOpen(false);
+}
 
-document.addEventListener("pointerdown", (event) => {
-  if (!isCompactLandscape() || !document.body.classList.contains("controls-open")) return;
-  if (controlsPanel?.contains(event.target) || controlsToggle?.contains(event.target)) return;
-  setControlsOpen(false);
-});
 
 let audioCtx;
 let masterGain;
@@ -86,6 +81,35 @@ const SECOND_VOICE_RULES = {
 const CHROMATIC_FALLBACK_INTERVAL = 4;
 const activePointers = new Map();
 const pressedKeys = new Set();
+
+updateViewportUnit();
+window.addEventListener("resize", updateViewportUnit);
+window.visualViewport?.addEventListener("resize", updateViewportUnit);
+window.addEventListener("orientationchange", () => {
+  updateViewportUnit();
+  closeLandscapeControls();
+});
+
+if (isIOS && fullscreenBtn) {
+  fullscreenBtn.hidden = true;
+}
+
+controlsToggle?.addEventListener("click", () => {
+  const nextOpen = !controlGrid.classList.contains("is-open");
+  setControlsOpen(nextOpen);
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (!isLandscapeView() || !controlGrid?.classList.contains("is-open")) return;
+  if (controlGrid.contains(event.target) || controlsToggle?.contains(event.target)) return;
+  setControlsOpen(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setControlsOpen(false);
+});
+
+document.addEventListener("gesturestart", (event) => event.preventDefault());
 
 function setupAudio() {
   if (audioCtx) return;
@@ -400,21 +424,13 @@ secondVoiceSwitch.addEventListener("click", () => {
   statusText.textContent = `Modo: ${SECOND_VOICE_LABELS[secondVoiceMode]}`;
 });
 
-if (isIOS || !document.documentElement.requestFullscreen) {
-  fullscreenBtn.hidden = true;
-} else {
-  fullscreenBtn.addEventListener("click", async () => {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-    } else {
-      await document.exitFullscreen?.();
-    }
-  });
-}
-
-document.addEventListener("gesturestart", (event) => event.preventDefault());
-document.addEventListener("gesturechange", (event) => event.preventDefault());
-document.addEventListener("gestureend", (event) => event.preventDefault());
+fullscreenBtn.addEventListener("click", async () => {
+  if (!document.fullscreenElement) {
+    await document.documentElement.requestFullscreen?.();
+  } else {
+    await document.exitFullscreen?.();
+  }
+});
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
@@ -437,29 +453,10 @@ if ("serviceWorker" in navigator) {
 }
 
 window.addEventListener("resize", () => {
-  updateViewportUnit();
-  if (!isCompactLandscape()) setControlsOpen(false);
   buildKeyboard();
   setTimeout(refreshKeyMap, 50);
 });
 
-window.visualViewport?.addEventListener("resize", () => {
-  updateViewportUnit();
-  if (!isCompactLandscape()) setControlsOpen(false);
-  buildKeyboard();
-  setTimeout(refreshKeyMap, 50);
-});
-
-window.addEventListener("orientationchange", () => {
-  window.setTimeout(() => {
-    updateViewportUnit();
-    setControlsOpen(false);
-    buildKeyboard();
-    refreshKeyMap();
-  }, 180);
-});
-
-updateViewportUnit();
 updateSecondVoiceSwitch();
 buildKeyboard();
 setTimeout(refreshKeyMap, 80);

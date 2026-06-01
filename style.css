@@ -13,11 +13,6 @@
   --shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --vh: 1dvh;
-}
-
-@supports (-webkit-touch-callout: none) {
-  :root { --vh: 1svh; }
 }
 
 * { box-sizing: border-box; }
@@ -26,7 +21,6 @@ html,
 body {
   width: 100%;
   height: 100%;
-  min-height: -webkit-fill-available;
   margin: 0;
   overflow: hidden;
   background: radial-gradient(circle at 6% 0%, rgba(56, 189, 248, 0.24), transparent 28%),
@@ -38,7 +32,6 @@ body {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -58,20 +51,9 @@ button,
 select,
 input { font: inherit; }
 
-button,
-select,
-input,
-textarea {
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 0;
-}
-
-button { border-radius: inherit; }
-
 .app-shell {
-  height: calc(var(--vh) * 100);
-  min-height: 100svh;
+  height: 100dvh;
+  min-height: 100dvh;
   padding: calc(14px + var(--safe-top)) clamp(10px, 1.55vw, 24px) calc(10px + var(--safe-bottom));
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
@@ -538,74 +520,202 @@ input[type="range"] {
   }
 }
 
-@media (orientation: landscape) and (max-height: 560px) {
+@media (orientation: landscape) and (max-height: 520px) {
   .app-shell {
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 6px;
-    padding: calc(5px + var(--safe-top)) calc(8px + env(safe-area-inset-right, 0px)) calc(5px + var(--safe-bottom)) calc(8px + env(safe-area-inset-left, 0px));
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-block: calc(8px + var(--safe-top)) calc(7px + var(--safe-bottom));
   }
 
   .topbar {
-    min-height: 0;
-    gap: 8px;
+    min-height: 46px;
   }
-
-  .brand { gap: 8px; }
 
   .app-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
-    font-size: 19px;
-    box-shadow: 0 8px 22px rgba(56, 189, 248, 0.18), inset 0 1px 0 rgba(255,255,255,0.45);
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+    font-size: 23px;
   }
 
-  h1 {
-    font-size: clamp(18px, 3.5vh, 24px);
-    letter-spacing: -0.055em;
+  h1 { font-size: 28px; }
+  .brand p { font-size: 13px; margin-top: 1px; }
+
+  .pill-btn {
+    min-height: 42px;
+    padding-inline: 14px;
+    font-size: 14px;
   }
 
-  .brand p,
-  .hintbar,
+  .round-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .control-grid {
+    grid-template-columns: 1.02fr 0.68fr 0.68fr 0.68fr 0.68fr 0.86fr 1fr;
+    gap: 9px;
+  }
+
+  .control-card {
+    min-height: 68px;
+    border-radius: 22px;
+  }
+
+  .octave-card,
+  .select-card,
+  .volume-card,
+  .second-voice-card {
+    padding: 9px 12px;
+  }
+
+  .step-btn {
+    width: 43px;
+    height: 43px;
+    border-radius: 13px;
+    font-size: 28px;
+  }
+
+  select {
+    height: 38px;
+    font-size: 14px;
+    border-radius: 11px;
+  }
+
+  .label { font-size: 10px; }
+  .control-center strong { font-size: 22px; margin-top: 3px; }
+
   .play-header {
     display: none;
   }
 
-  .top-actions { gap: 6px; }
-
-  .pill-btn {
-    min-height: 34px;
-    padding-inline: 10px;
-    font-size: 13px;
+  .piano-stage {
+    padding: 9px;
+    border-radius: 24px;
   }
 
-  .round-btn {
-    width: 34px;
-    height: 34px;
-    font-size: 16px;
+  .keyboard {
+    min-height: 0;
   }
 
-  .control-grid {
-    grid-row: 1;
-    justify-self: end;
-    width: min(78vw, 780px);
-    grid-template-columns: minmax(148px, 1.15fr) repeat(3, minmax(100px, 0.8fr)) minmax(122px, 0.95fr) minmax(120px, 1fr);
+  .hintbar { font-size: 12px; }
+}
+
+@media (min-width: 1280px) {
+  .white-key { flex-basis: var(--white-width-desktop, 76px); }
+  .black-key { width: var(--black-width-desktop, 47px); }
+}
+
+/* v4: En móviles horizontales los controles no ocupan espacio fijo.
+   Se abren como panel flotante desde el botón "Controles". */
+:root { --vh: 1dvh; }
+@supports (-webkit-touch-callout: none) {
+  :root { --vh: 1svh; }
+}
+
+.controls-toggle { display: none; }
+
+html,
+body {
+  min-height: -webkit-fill-available;
+}
+
+.app-shell {
+  height: calc(var(--vh) * 100);
+  min-height: calc(var(--vh) * 100);
+}
+
+@media (orientation: landscape) and (max-height: 720px),
+       (orientation: landscape) and (pointer: coarse) {
+  .app-shell {
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 6px;
-    align-items: stretch;
+    padding: calc(6px + var(--safe-top)) calc(8px + env(safe-area-inset-right, 0px)) calc(6px + var(--safe-bottom)) calc(8px + env(safe-area-inset-left, 0px));
   }
 
   .topbar {
-    display: grid;
-    grid-template-columns: minmax(120px, auto) minmax(0, 1fr) auto;
-    align-items: center;
+    min-height: 38px;
+    gap: 8px;
+    position: relative;
+    z-index: 30;
   }
 
-  .control-grid { grid-column: 2; }
-  .top-actions { grid-column: 3; }
+  .brand {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .app-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+
+  h1 {
+    font-size: clamp(18px, 4.6vh, 26px);
+    line-height: 1;
+  }
+
+  .brand p,
+  .play-header,
+  .hintbar,
+  #fullscreenBtn {
+    display: none !important;
+  }
+
+  .top-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .controls-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pill-btn {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .control-grid {
+    display: none;
+    position: fixed;
+    top: calc(48px + var(--safe-top));
+    right: calc(8px + env(safe-area-inset-right, 0px));
+    left: auto;
+    z-index: 40;
+    width: min(620px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+    max-height: calc((var(--vh) * 100) - 58px - var(--safe-top) - var(--safe-bottom));
+    overflow: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    padding: 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    background: rgba(5, 11, 20, 0.92);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .control-grid.is-open {
+    display: grid;
+  }
+
+  .control-grid > * {
+    grid-column: auto !important;
+    min-width: 0;
+  }
 
   .control-card {
-    min-height: 42px;
-    border-radius: 16px;
+    min-height: 54px;
+    border-radius: 14px;
     box-shadow: 0 10px 26px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.10);
   }
 
@@ -613,47 +723,52 @@ input[type="range"] {
   .select-card,
   .volume-card,
   .second-voice-card {
-    padding: 5px 8px;
-    gap: 4px;
+    padding: 6px 8px;
+    gap: 5px;
   }
 
   .octave-card {
-    grid-template-columns: auto minmax(42px, 1fr) auto;
-    gap: 6px;
+    grid-template-columns: 34px minmax(42px, 1fr) 34px;
   }
 
   .step-btn {
-    width: 31px;
-    height: 31px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
     border-radius: 10px;
-    font-size: 21px;
+    font-size: 22px;
   }
 
   .label {
     font-size: 8px;
-    letter-spacing: 0.11em;
+    line-height: 1;
+    letter-spacing: .12em;
   }
 
   .control-center strong {
-    font-size: 17px;
-    margin-top: 0;
+    font-size: 18px;
+    line-height: 1;
+    margin-top: 1px;
   }
 
   select,
   .second-voice-switch {
-    height: 30px;
-    min-height: 30px;
+    height: 31px;
+    min-height: 31px;
     border-radius: 10px;
-    padding-inline: 9px;
-    font-size: 16px;
+    padding-inline: 8px;
+    font-size: 14px;
+    line-height: 1;
   }
 
   input[type="range"] {
-    height: 28px;
+    height: 24px;
+    margin: 0;
   }
 
   .piano-stage {
     grid-row: 2;
+    min-height: 0;
     padding: 7px;
     border-radius: 20px;
   }
@@ -661,7 +776,6 @@ input[type="range"] {
   .keyboard {
     min-height: 0;
     border-radius: 15px;
-    touch-action: pan-x;
   }
 
   .white-key {
@@ -685,413 +799,37 @@ input[type="range"] {
   }
 }
 
-@media (orientation: landscape) and (max-height: 430px) {
+@media (orientation: landscape) and (max-height: 380px) {
   .app-shell {
+    grid-template-rows: 32px minmax(0, 1fr);
     gap: 4px;
     padding-top: calc(3px + var(--safe-top));
-    padding-bottom: calc(3px + var(--safe-bottom));
+    padding-bottom: calc(4px + var(--safe-bottom));
+  }
+
+  .topbar {
+    min-height: 32px;
   }
 
   .app-icon,
-  .top-actions,
   h1 {
     display: none;
   }
 
-  .topbar {
-    display: block;
+  .pill-btn {
+    min-height: 30px;
+    padding-inline: 10px;
+    font-size: 12px;
   }
 
   .control-grid {
-    width: 100%;
-    grid-template-columns: 1.15fr 0.8fr 0.95fr 1fr;
-  }
-
-  .select-card:nth-child(3) {
-    display: none;
-  }
-
-  .control-card {
-    min-height: 36px;
-    border-radius: 14px;
-  }
-
-  .octave-card,
-  .select-card,
-  .volume-card,
-  .second-voice-card {
-    padding-block: 3px;
-  }
-
-  select,
-  .second-voice-switch {
-    height: 28px;
-    min-height: 28px;
-  }
-}
-
-
-/* Ajuste final para móviles en horizontal: una sola barra compacta y más espacio para el piano. */
-@media (orientation: landscape) and (max-height: 560px) {
-  .app-shell {
-    grid-template-rows: 38px minmax(0, 1fr);
-    gap: 4px;
-    padding: calc(3px + var(--safe-top)) calc(6px + env(safe-area-inset-right, 0px)) calc(4px + var(--safe-bottom)) calc(6px + env(safe-area-inset-left, 0px));
-  }
-
-  .topbar,
-  .control-grid {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .topbar {
-    display: block;
-    min-height: 0;
-  }
-
-  .brand,
-  .top-actions,
-  .play-header,
-  .hintbar {
-    display: none !important;
-  }
-
-  .control-grid {
-    grid-row: 1;
-    display: grid;
-    grid-template-columns: minmax(132px, 1.1fr) minmax(84px, .75fr) minmax(132px, 1fr) minmax(126px, .95fr);
-    gap: 4px;
-    align-items: stretch;
-    justify-self: stretch;
-  }
-
-  .control-grid > * {
-    grid-column: auto !important;
-    min-width: 0;
-  }
-
-  .select-card:nth-child(3) {
-    display: none !important;
-  }
-
-  .control-card {
-    min-height: 0;
-    height: 38px;
-    border-radius: 12px;
-    box-shadow: 0 7px 16px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.10);
-  }
-
-  .octave-card,
-  .select-card,
-  .volume-card,
-  .second-voice-card {
-    padding: 3px 6px;
-    gap: 3px;
-  }
-
-  .octave-card {
-    grid-template-columns: 28px minmax(38px, 1fr) 28px;
-  }
-
-  .step-btn {
-    width: 27px;
-    height: 27px;
-    min-width: 27px;
-    border-radius: 8px;
-    font-size: 18px;
-  }
-
-  .label {
-    font-size: 7px;
-    line-height: 1;
-    letter-spacing: .1em;
-  }
-
-  .control-center strong {
-    font-size: 16px;
-    line-height: 1;
-    margin-top: 0;
-  }
-
-  select,
-  .second-voice-switch {
-    height: 25px;
-    min-height: 25px;
-    border-radius: 8px;
-    padding-inline: 7px;
-    font-size: 14px;
-    line-height: 1;
-  }
-
-  input[type="range"] {
-    height: 20px;
-    margin: 0;
+    top: calc(38px + var(--safe-top));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: calc((var(--vh) * 100) - 44px - var(--safe-top) - var(--safe-bottom));
   }
 
   .piano-stage {
-    grid-row: 2;
-    min-height: 0;
     padding: 5px;
     border-radius: 16px;
-  }
-
-  .keyboard {
-    min-height: 0;
-    border-radius: 12px;
-  }
-
-  .white-key {
-    flex-basis: var(--white-width-landscape, 54px);
-  }
-
-  .black-key {
-    width: var(--black-width-landscape, 32px);
-  }
-
-  .key-label {
-    bottom: 7px;
-    font-size: 11px;
-  }
-
-  .black-key .key-label {
-    bottom: 13px;
-    font-size: 9px;
-  }
-}
-
-@media (orientation: landscape) and (max-height: 360px) {
-  .app-shell {
-    grid-template-rows: 30px minmax(0, 1fr);
-    gap: 3px;
-    padding-top: calc(2px + var(--safe-top));
-    padding-bottom: calc(3px + var(--safe-bottom));
-  }
-
-  .control-grid {
-    grid-template-columns: minmax(120px, 1.05fr) minmax(80px, .7fr) minmax(118px, .95fr) minmax(108px, .85fr);
-    gap: 3px;
-  }
-
-  .control-card {
-    height: 30px;
-    border-radius: 10px;
-  }
-
-  .octave-card,
-  .select-card,
-  .volume-card,
-  .second-voice-card {
-    padding: 2px 5px;
-  }
-
-  .label {
-    display: none;
-  }
-
-  .octave-card {
-    grid-template-columns: 24px minmax(34px, 1fr) 24px;
-  }
-
-  .step-btn {
-    width: 23px;
-    height: 23px;
-    min-width: 23px;
-    border-radius: 7px;
-    font-size: 16px;
-  }
-
-  .control-center strong {
-    font-size: 15px;
-  }
-
-  select,
-  .second-voice-switch {
-    height: 24px;
-    min-height: 24px;
-    font-size: 13px;
-  }
-
-  .piano-stage {
-    padding: 4px;
-    border-radius: 14px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .white-key { flex-basis: var(--white-width-desktop, 76px); }
-  .black-key { width: var(--black-width-desktop, 47px); }
-}
-
-
-/* v7: en móviles horizontales el menú no ocupa espacio de layout; queda como panel flotante. */
-.controls-toggle {
-  display: none;
-}
-
-@media (orientation: landscape) and (max-height: 560px) {
-  .app-shell {
-    grid-template-rows: minmax(0, 1fr) !important;
-    gap: 0 !important;
-    padding: calc(4px + env(safe-area-inset-top, 0px)) calc(6px + env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) calc(6px + env(safe-area-inset-left, 0px)) !important;
-  }
-
-  .topbar,
-  .brand,
-  .top-actions,
-  .play-header,
-  .hintbar {
-    display: none !important;
-  }
-
-  .piano-stage {
-    grid-row: 1 !important;
-    min-height: 0 !important;
-    height: 100% !important;
-    padding: 5px !important;
-    border-radius: 16px !important;
-  }
-
-  .keyboard {
-    min-height: 0 !important;
-    height: 100% !important;
-    border-radius: 12px !important;
-  }
-
-  .controls-toggle {
-    display: inline-flex !important;
-    position: fixed;
-    z-index: 50;
-    top: calc(6px + env(safe-area-inset-top, 0px));
-    right: calc(8px + env(safe-area-inset-right, 0px));
-    height: 30px;
-    min-height: 30px;
-    align-items: center;
-    justify-content: center;
-    padding: 0 10px;
-    border: 1px solid rgba(255,255,255,0.26);
-    border-radius: 999px;
-    color: var(--text);
-    background: rgba(5, 11, 20, 0.72);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.12);
-    font-size: 12px;
-    font-weight: 850;
-    line-height: 1;
-  }
-
-  .control-grid {
-    position: fixed !important;
-    z-index: 49;
-    top: calc(42px + env(safe-area-inset-top, 0px)) !important;
-    right: calc(8px + env(safe-area-inset-right, 0px)) !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: min(360px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))) !important;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    gap: 5px !important;
-    align-items: stretch !important;
-    justify-self: auto !important;
-    padding: 6px !important;
-    border: 1px solid rgba(255,255,255,0.20);
-    border-radius: 15px;
-    background: rgba(5, 11, 20, 0.78);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 14px 38px rgba(0,0,0,0.44);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-10px) scale(.98);
-    transform-origin: top right;
-    transition: opacity 140ms ease, transform 140ms ease;
-  }
-
-  body.controls-open .control-grid {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
-  }
-
-  .control-grid > * {
-    grid-column: auto !important;
-    min-width: 0 !important;
-  }
-
-  .octave-card,
-  .second-voice-card {
-    grid-column: 1 / -1 !important;
-  }
-
-  .select-card:nth-child(3) {
-    display: none !important;
-  }
-
-  .control-card {
-    min-height: 0 !important;
-    height: 32px !important;
-    border-radius: 10px !important;
-    background: rgba(255,255,255,0.10) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10) !important;
-  }
-
-  .octave-card,
-  .select-card,
-  .volume-card,
-  .second-voice-card {
-    padding: 3px 5px !important;
-    gap: 4px !important;
-  }
-
-  .label {
-    display: none !important;
-  }
-
-  .octave-card {
-    grid-template-columns: 30px minmax(0, 1fr) 30px !important;
-  }
-
-  .step-btn {
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    border-radius: 8px !important;
-    font-size: 18px !important;
-  }
-
-  .control-center strong {
-    margin: 0 !important;
-    font-size: 17px !important;
-    line-height: 1 !important;
-  }
-
-  select,
-  .second-voice-switch {
-    height: 26px !important;
-    min-height: 26px !important;
-    border-radius: 8px !important;
-    padding-inline: 8px !important;
-    font-size: 13px !important;
-    line-height: 1 !important;
-  }
-
-  input[type="range"] {
-    height: 20px !important;
-    margin: 0 !important;
-  }
-}
-
-@media (orientation: landscape) and (max-height: 360px) {
-  .controls-toggle {
-    height: 26px;
-    min-height: 26px;
-    padding-inline: 8px;
-    font-size: 11px;
-  }
-
-  .control-grid {
-    top: calc(34px + env(safe-area-inset-top, 0px)) !important;
-    width: min(320px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))) !important;
   }
 }
